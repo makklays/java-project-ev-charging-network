@@ -41,7 +41,7 @@ amount, releases remaining funds, and dispatches an electronic receipt asynchron
 ## 🛠️ Tech Stack & Prerequisites
 
 * **Backend**: Java 17 (Utilizing Record types and Pattern Matching)
-* **Framework**: Spring Boot 3.3+ (Spring Web, Spring Data JPA)
+* **Framework**: Spring Boot 3.3+ (Spring Web, Spring Security, Spring Data JPA)
 * **Database**: PostgreSQL 16+
 * **Build System**: Apache Maven 3.9+
 * **Testing**: JUnit 5 (with 100% Mock-free unit testing for the domain core)
