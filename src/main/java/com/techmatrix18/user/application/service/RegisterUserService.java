@@ -23,7 +23,6 @@ public class RegisterUserService implements RegisterUserUseCase {
 
     private final UserRepository userRepository;
 
-    // Внедряем интерфейс исходящего порта, а не конкретный JPA репозиторий
     public RegisterUserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
@@ -40,17 +39,17 @@ public class RegisterUserService implements RegisterUserUseCase {
 
         // Создаем чистый доменный объект через конструктор
         User newUser = new User(
-                command.username(),
-                command.email(),
-                BaseRole.USER,
-                command.mobile(),
-                command.nickname(),
-                command.gender(),
-                null, // avatarUrl изначально пустой
-                command.birthDate(),
-                null, // bio изначально пустое
-                UserStatus.DRIVER,
-                command.password() // Здесь в будущем добавится кодирование пароля через порт хэширования
+            command.username(),
+            command.email(),
+            BaseRole.USER,
+            command.mobile(),
+            command.nickname(),
+            command.gender(),
+            null, // avatarUrl изначально пустой
+            command.birthDate(),
+            null, // bio изначально пустое
+            UserStatus.DRIVER,
+            command.password() // Здесь в будущем добавится кодирование пароля через порт хэширования
         );
 
         // Сохраняем в БД через исходящий порт

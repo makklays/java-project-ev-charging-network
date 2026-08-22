@@ -31,14 +31,14 @@ public class UpdateUserService implements UpdateUserUseCase {
     public User updateProfile(UpdateUserCommand command) {
         // 1. Получаем чистый доменный объект из базы данных
         User user = userRepository.findById(command.userId())
-                .orElseThrow(() -> new UserNotFoundException(command.userId()));
+            .orElseThrow(() -> new UserNotFoundException(command.userId()));
 
         // 2. Делегируем бизнес-логику изменения данных внутрь доменной сущности.
         // Именно домен внутри себя инкапсулирует правила изменения и обновляет дату updatedAt.
         user.updateProfile(
-                command.nickname(),
-                command.bio(),
-                command.avatarUrl()
+            command.nickname(),
+            command.bio(),
+            command.avatarUrl()
         );
 
         // 3. Сохраняем обновленный доменный агрегат обратно через исходящий порт
