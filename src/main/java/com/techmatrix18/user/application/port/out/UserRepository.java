@@ -4,7 +4,7 @@ import com.techmatrix18.user.domain.User;
 import java.util.Optional;
 
 /**
- * UserRepositoryPort
+ * UserRepository
  *
  * @author Alexander Kuziv <makklays@gmail.com>
  * @company TechMatrix18
