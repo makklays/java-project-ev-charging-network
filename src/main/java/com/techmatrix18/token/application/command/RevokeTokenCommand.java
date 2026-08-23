@@ -4,6 +4,7 @@ import java.util.Objects;
 
 /**
  * RevokeTokenCommand
+ * Аннулирование (отзыв) сессии в базе данных при разлогине (Logout)
  *
  * @author Alexander Kuziv <makklays@gmail.com>
  * @company TechMatrix18

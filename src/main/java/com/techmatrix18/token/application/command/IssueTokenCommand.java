@@ -4,6 +4,7 @@ import java.util.Objects;
 
 /**
  * IssueTokenCommand
+ * Безопасная генерация и сохранение новой пары JWT-токенов в базе данных
  *
  * @author Alexander Kuziv <makklays@gmail.com>
  * @company TechMatrix18

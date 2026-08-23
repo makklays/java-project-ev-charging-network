@@ -4,6 +4,7 @@ import java.util.Objects;
 
 /**
  * RefreshTokenCommand
+ * Проверка и последующий выпуск новой пары JWT-токенов взамен истекших (без повторного ввода логина и пароля)
  *
  * @author Alexander Kuziv <makklays@gmail.com>
  * @company TechMatrix18
