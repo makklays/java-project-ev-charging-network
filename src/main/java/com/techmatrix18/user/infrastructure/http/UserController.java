@@ -1,9 +1,9 @@
 package com.techmatrix18.user.infrastructure.http;
 
 import com.techmatrix18.user.application.command.RegisterUserCommand;
-import com.techmatrix18.user.application.command.UpdateProfileCommand;
+import com.techmatrix18.user.application.command.UpdateUserCommand;
 import com.techmatrix18.user.application.port.in.RegisterUserUseCase;
-import com.techmatrix18.user.application.port.in.UpdateProfileUseCase;
+import com.techmatrix18.user.application.port.in.UpdateUserUseCase;
 import com.techmatrix18.user.domain.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,11 +23,11 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final RegisterUserUseCase registerUserUseCase;
-    private final UpdateProfileUseCase updateProfileUseCase;
+    private final UpdateUserUseCase updateUserUseCase;
 
-    public UserController(RegisterUserUseCase registerUserUseCase, UpdateProfileUseCase updateProfileUseCase) {
+    public UserController(RegisterUserUseCase registerUserUseCase, UpdateUserUseCase updateUserUseCase) {
         this.registerUserUseCase = registerUserUseCase;
-        this.updateProfileUseCase = updateProfileUseCase;
+        this.updateUserUseCase = updateUserUseCase;
     }
 
     @PostMapping("/register")
@@ -37,8 +37,9 @@ public class UserController {
     }
 
     @PutMapping("/profile")
-    public ResponseEntity<UserResponse> updateProfile(@RequestBody UpdateProfileCommand command) {
-        User updatedUser = updateProfileUseCase.updateProfile(command);
+    public ResponseEntity<UserResponse> updateUser(@RequestBody UpdateUserRequest request) {
+        UpdateUserCommand command = request.toCommand();
+        User updatedUser = updateUserUseCase.updateUser(command);
         return ResponseEntity.ok(UserResponse.fromDomain(updatedUser));
     }
 }

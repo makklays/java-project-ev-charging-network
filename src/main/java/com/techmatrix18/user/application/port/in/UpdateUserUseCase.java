@@ -13,6 +13,6 @@ import com.techmatrix18.user.domain.User;
  */
 
 public interface UpdateUserUseCase {
-    User updateProfile(UpdateUserCommand command);
+    User updateUser(UpdateUserCommand command);
 }
 
