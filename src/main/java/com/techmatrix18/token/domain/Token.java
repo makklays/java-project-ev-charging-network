@@ -57,6 +57,8 @@ public class Token {
         return ZonedDateTime.now().isAfter(expiredRefreshToken);
     }
 
+    // Перевод токена (например, JWT) в недействительное (отозванное) состояние.
+    // При Logout или умышленной блокировке token
     public void revoke() {
         this.revoked = true;
         this.updatedAt = ZonedDateTime.now();
