@@ -16,7 +16,7 @@ import java.util.Objects;
 public class User {
     private final Long id;
     private String username;
-    private final String email;
+    private String email;
     private BaseRole baseRole;
     private String mobile;
     private String nickname;
@@ -82,6 +82,100 @@ public class User {
     public void changeStatus(UserStatus newStatus) {
         this.status = Objects.requireNonNull(newStatus);
         this.updatedAt = ZonedDateTime.now();
+    }
+
+    // Бизнес-логика активации пользователя. Переводит аккаунт в активное состояние.
+    public void activate() {
+        // Защита: если пользователь уже активен, генерируем доменное исключение
+        if (this.status == UserStatus.ACTIVE) {
+            throw new IllegalStateException("User account is already active");
+        }
+
+        // Меняем состояние
+        this.status = UserStatus.ACTIVE;
+
+        // Фиксируем время изменения
+        this.updatedAt = ZonedDateTime.now();
+    }
+
+    // Блокировка пользователя
+    public void block(String reason) {
+        if (this.status == UserStatus.BLOCKED) {
+            throw new IllegalStateException("User account is already blocked");
+        }
+        this.status = UserStatus.BLOCKED;
+        this.updatedAt = ZonedDateTime.now();
+    }
+
+    // Мягкое удаление пользователя
+    public void delete() {
+        if (this.status == UserStatus.DELETED) {
+            throw new IllegalStateException("User account is already deleted");
+        }
+        this.status = UserStatus.DELETED;
+        this.updatedAt = ZonedDateTime.now();
+    }
+
+    // Изменение email пользователя.
+    public void changeEmail(String newEmail) {
+        Objects.requireNonNull(newEmail, "New email cannot be null");
+
+        // Защита: новый email не должен совпадать с текущим
+        if (newEmail.equalsIgnoreCase(this.email)) {
+            throw new IllegalStateException("New email must be different from the current one");
+        }
+
+        this.email = newEmail;
+        this.updatedAt = java.time.ZonedDateTime.now();
+    }
+
+    // Изменение пароля пользователя.
+    public void changePassword(String hashedNewPassword) {
+        Objects.requireNonNull(hashedNewPassword, "Hashed password cannot be null");
+
+        this.password = hashedNewPassword;
+        this.updatedAt = java.time.ZonedDateTime.now();
+    }
+
+    // Смена роли пользователя.
+    public void changeRole(BaseRole newRole) {
+        Objects.requireNonNull(newRole, "New role cannot be null");
+
+        if (this.baseRole == newRole) {
+            throw new IllegalStateException("User already has the " + newRole + " role");
+        }
+
+        this.baseRole = newRole;
+        this.updatedAt = java.time.ZonedDateTime.now();
+    }
+
+    // Мягкое удаление пользователя. Переводит аккаунт в статус DELETED.
+    /*public void delete() {
+        if (this.status == UserStatus.DELETED) {
+            throw new IllegalStateException("User account is already deleted");
+        }
+        this.status = UserStatus.DELETED;
+        this.updatedAt = java.time.ZonedDateTime.now();
+    }*/
+
+    // Обновление ссылки на аватар пользователя.
+    public void updateAvatar(String avatarUrl) {
+        java.util.Objects.requireNonNull(avatarUrl, "Avatar URL cannot be null");
+
+        this.avatarUrl = avatarUrl;
+        this.updatedAt = java.time.ZonedDateTime.now();
+    }
+
+    // Обновление номера телефона пользователя.
+    public void updateMobile(String newMobile) {
+        java.util.Objects.requireNonNull(newMobile, "Mobile number cannot be null");
+
+        if (newMobile.equals(this.mobile)) {
+            throw new IllegalStateException("New mobile number must be different from the current one");
+        }
+
+        this.mobile = newMobile;
+        this.updatedAt = java.time.ZonedDateTime.now();
     }
 
     // --- Геттеры ---

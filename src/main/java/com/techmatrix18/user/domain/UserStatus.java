@@ -10,6 +10,11 @@ package com.techmatrix18.user.domain;
  */
 
 public enum UserStatus {
+    PENDING,   // Ожидает подтверждения (например, после регистрации)
+    ACTIVE,    // Активен (результат вызова команды activate)
+    BLOCKED,   // Заблокирован (результат вызова команды block)
+    DELETED,    // Мягко удален (результат вызова команды delete)
+
     DRIVER,
     PASSENGER,
     VIP

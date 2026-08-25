@@ -1,15 +1,15 @@
 package com.techmatrix18.user.application.service;
 
-import com.techmatrix18.user.application.command.DeleteUserCommand;
-import com.techmatrix18.user.application.port.in.DeleteUserUseCase;
+import com.techmatrix18.user.application.command.BlockUserCommand;
+import com.techmatrix18.user.application.port.in.BlockUserUseCase;
 import com.techmatrix18.user.application.port.out.UserRepository;
 import com.techmatrix18.user.domain.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * DeleteUserService
- * Реализация бизнес-логики мягкого удаления пользователя
+ * BlockUserService
+ * Реализация бизнес-логики блокировки пользователя
  *
  * @author Alexander Kuziv <makklays@gmail.com>
  * @company TechMatrix18
@@ -18,25 +18,25 @@ import org.springframework.transaction.annotation.Transactional;
  */
 
 @Service
-public class DeleteUserService implements DeleteUserUseCase {
+public class BlockUserService implements BlockUserUseCase {
 
     private final UserRepository userRepository;
 
-    public DeleteUserService(UserRepository userRepository) {
+    public BlockUserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
     @Override
     @Transactional
-    public void deleteUser(DeleteUserCommand command) {
+    public void blockUser(BlockUserCommand command) {
         // 1. Извлекаем доменную модель пользователя
         User user = userRepository.findById(command.userId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + command.userId()));
 
-        // 2. Вызываем доменный метод мягкого удаления внутри сущности User
-        user.delete();
+        // 2. Передаем управление и причину блокировки в доменную логику
+        user.block(command.reason());
 
-        // 3. Сохраняем обновленный статус пользователя обратно в базу
+        // 3. Сохраняем обновленную сущность обратно в базу
         userRepository.save(user);
     }
 }
