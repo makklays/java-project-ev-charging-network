@@ -7,7 +7,9 @@ CREATE TABLE IF NOT EXISTS user_wallets (
     id          UUID PRIMARY KEY,
     user_id     BIGINT NOT NULL REFERENCES users(id),
     balance     NUMERIC(12,4) NOT NULL DEFAULT 0.0000,
-    version     BIGINT NOT NULL DEFAULT 0, -- Версия записи для паттерна Optimistic Locking (предотвращение Race Conditions)
+
+    -- Версия записи для паттерна Optimistic Locking (предотвращение Race Conditions)
+    version     BIGINT NOT NULL DEFAULT 0,
     created_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
