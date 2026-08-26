@@ -66,6 +66,21 @@ public class UserEntity {
     @Column(name = "updated_at")
     private ZonedDateTime updatedAt;
 
+    // --- Автоматическое управление временными метками ---
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.createdAt == null) {
+            this.createdAt = ZonedDateTime.now();
+        }
+        this.updatedAt = ZonedDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = ZonedDateTime.now();
+    }
+
     // --- Конструкторы ---
 
     public UserEntity() {
