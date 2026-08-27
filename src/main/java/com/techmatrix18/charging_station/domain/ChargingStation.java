@@ -62,9 +62,7 @@ public class ChargingStation {
 
     // --- Бизнес-методы (Rich Domain Model) ---
 
-    /**
-     * Перевод станции на техническое обслуживание
-     */
+    // Перевод станции на техническое обслуживание
     public void startMaintenance() {
         if (this.status == ChargingStationStatus.UNDER_MAINTENANCE) {
             throw new IllegalStateException("Station is already under maintenance");
@@ -73,20 +71,61 @@ public class ChargingStation {
         this.updatedAt = ZonedDateTime.now();
     }
 
-    /**
-     * Возврат станции в режим работы Online
-     */
+    // Возврат станции в режим работы Online
     public void setOnline() {
         this.status = ChargingStationStatus.ONLINE;
         this.updatedAt = ZonedDateTime.now();
     }
 
-    /**
-     * Фиксация аварийного отключения станции (например, пропала связь с контроллером)
-     */
+    // Фиксация аварийного отключения станции (например, пропала связь с контроллером)
     public void setOffline() {
         this.status = ChargingStationStatus.OFFLINE;
         this.updatedAt = ZonedDateTime.now();
+    }
+
+    // Бизнес-метод: Корректировка гео-координат расположения зарядной станции
+    public void updateGeo(BigDecimal latitude, BigDecimal longitude) {
+        this.latitude = java.util.Objects.requireNonNull(latitude, "Latitude coordinate cannot be null");
+        this.longitude = java.util.Objects.requireNonNull(longitude, "Longitude coordinate cannot be null");
+
+        // Валидация диапазонов координат Земли для предотвращения грубых ошибок ввода
+        if (latitude.compareTo(new BigDecimal("-90")) < 0 || latitude.compareTo(new BigDecimal("90")) > 0) {
+            throw new IllegalArgumentException("Latitude must be between -90 and 90 degrees");
+        }
+        if (longitude.compareTo(new BigDecimal("-180")) < 0 || longitude.compareTo(new BigDecimal("180")) > 0) {
+            throw new IllegalArgumentException("Longitude must be between -180 and 180 degrees");
+        }
+
+        this.updatedAt = java.time.ZonedDateTime.now();
+    }
+
+    // Бизнес-метод: Динамическое изменение лимита мощности станции
+    public void rebalancePower(BigDecimal newMaxPowerKw) {
+        java.util.Objects.requireNonNull(newMaxPowerKw, "New maximum power value cannot be null");
+
+        if (newMaxPowerKw.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Rebalanced power must be a positive physical value");
+        }
+
+        this.maxPowerKw = newMaxPowerKw;
+        this.updatedAt = java.time.ZonedDateTime.now();
+    }
+
+    // Бизнес-метод: Изменение публичного имени и адреса расположения станции
+    public void updateDetails(String name, String address) {
+        this.name = java.util.Objects.requireNonNull(name, "Station name cannot be null");
+        this.address = java.util.Objects.requireNonNull(address, "Station address cannot be null");
+
+        // Бизнес-валидация: защищаем домен от пустых строк, отправленных из API
+        if (name.isBlank()) {
+            throw new IllegalArgumentException("Station name cannot be empty or blank");
+        }
+        if (address.isBlank()) {
+            throw new IllegalArgumentException("Station address cannot be empty or blank");
+        }
+
+        // Фиксируем точное время изменения метаданных в UTC
+        this.updatedAt = java.time.ZonedDateTime.now();
     }
 
     // --- Геттеры ---
