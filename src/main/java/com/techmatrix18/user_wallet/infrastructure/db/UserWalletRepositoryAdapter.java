@@ -35,13 +35,13 @@ public class UserWalletRepositoryAdapter implements UserWalletRepository {
 
     @Override
     public UserWallet save(UserWallet wallet) {
-        // 1. Переводим чистый Домен в JPA Entity
+        // Переводим чистый Домен в JPA Entity
         UserWalletEntity entity = UserWalletEntity.fromDomain(wallet);
 
-        // 2. Сохраняем в базу данных через Spring Data
+        // Сохраняем в базу данных через Spring Data
         UserWalletEntity savedEntity = repository.save(entity);
 
-        // 3. [OUTBOX EVENT]: Цикл перебора и сохранения доменных событий в таблицу Outbox
+        // [OUTBOX EVENT]: Цикл перебора и сохранения доменных событий в таблицу Outbox
         for (Object event : wallet.getDomainEvents()) {
             try {
                 // Превращаем доменное событие в строку JSON
@@ -62,10 +62,10 @@ public class UserWalletRepositoryAdapter implements UserWalletRepository {
             }
         }
 
-        // 4. [OUTBOX EVENT]: Очищаем события в оперативной памяти доменного объекта
+        // [OUTBOX EVENT]: Очищаем события в оперативной памяти доменного объекта
         wallet.clearDomainEvents();
 
-        // 5. Возвращаем обратно доменный объект
+        // Возвращаем обратно доменный объект
         return savedEntity.toDomain();
     }
 
