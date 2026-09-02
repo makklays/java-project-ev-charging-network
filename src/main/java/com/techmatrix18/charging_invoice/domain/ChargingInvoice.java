@@ -3,6 +3,9 @@ package com.techmatrix18.charging_invoice.domain;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -39,6 +42,9 @@ public class ChargingInvoice {
     private final ZonedDateTime issuedAt;
     private ZonedDateTime paidAt;
     private final Long version;
+
+    // Список событий, произошедших с агрегатом в памяти
+    private final List<Object> domainEvents = new ArrayList<>();
 
     /**
      * Конструктор для первичного формирования инвойса (Вызывается биллингом при закрытии сессии)
@@ -143,6 +149,20 @@ public class ChargingInvoice {
         if (this.chargingDurationMinutes < 0 || this.idleMinutes < 0) {
             throw new IllegalArgumentException("Time indicators cannot hold negative duration values");
         }
+    }
+
+    /**
+     * Возвращает неизменяемый список произошедших доменных событий.
+     */
+    public List<Object> getDomainEvents() {
+        return Collections.unmodifiableList(domainEvents);
+    }
+
+    /**
+     * Очищает список событий после их успешного сохранения инфраструктурным адаптером.
+     */
+    public void clearDomainEvents() {
+        this.domainEvents.clear();
     }
 
     // --- Геттеры для портов и мапперов ---

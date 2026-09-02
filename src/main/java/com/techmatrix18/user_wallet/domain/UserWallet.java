@@ -2,8 +2,7 @@ package com.techmatrix18.user_wallet.domain;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * UserWallet
@@ -22,6 +21,9 @@ public class UserWallet {
     private final Long version;
     private final ZonedDateTime createdAt;
     private ZonedDateTime updatedAt;
+
+    // Список событий, произошедших с агрегатом в памяти
+    private final List<Object> domainEvents = new ArrayList<>();
 
     // Конструктор для первичного бизнес-создания кошелька (например, при регистрации пользователя)
     public UserWallet(Long userId) {
@@ -52,6 +54,9 @@ public class UserWallet {
         }
         this.balance = this.balance.add(amount);
         this.updatedAt = ZonedDateTime.now();
+
+        // [OUTBOX EVENT]: Фиксируем доменное событие пополнения кошелька
+        this.domainEvents.add(new WalletDepositedEvent(this.id, this.userId, amount));
     }
 
     // Бизнес-метод: Списание с баланса (Списание за кВт*ч или простой)
@@ -65,6 +70,25 @@ public class UserWallet {
         }
         this.balance = this.balance.subtract(amount);
         this.updatedAt = ZonedDateTime.now();
+
+        // [OUTBOX EVENT]: Фиксируем доменное событие вывода/списания средств
+        this.domainEvents.add(new MoneyWithdrawnEvent(this.id, this.userId, amount));
+    }
+
+    /**
+     * Возвращает список всех произошедших доменных событий.
+     * Обертка в unmodifiableList защищает коллекцию от случайного изменения извне домена.
+     */
+    public List<Object> getDomainEvents() {
+        return Collections.unmodifiableList(domainEvents);
+    }
+
+    /**
+     * Очищает список событий после того, как инфраструктурный адаптер
+     * успешно перенес их в таблицу outbox_events.
+     */
+    public void clearDomainEvents() {
+        this.domainEvents.clear();
     }
 
     // --- Геттеры для маппинга в инфраструктуру ---

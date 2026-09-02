@@ -1,6 +1,9 @@
 package com.techmatrix18.evse_point.domain;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -22,6 +25,9 @@ public class EvsePoint {
     private final Long version;
     private final ZonedDateTime createdAt;
     private ZonedDateTime updatedAt;
+
+    // Список событий, произошедших с агрегатом в памяти
+    private final List<Object> domainEvents = new ArrayList<>();
 
     /**
      * Конструктор для первичного создания новой точки (Сценарий монтажа и расширения станции)
@@ -106,6 +112,20 @@ public class EvsePoint {
         if (this.ocppEvseId < 0) {
             throw new IllegalArgumentException("OCPP EVSE ID cannot be negative");
         }
+    }
+
+    /**
+     * Возвращает неизменяемый список произошедших доменных событий.
+     */
+    public List<Object> getDomainEvents() {
+        return Collections.unmodifiableList(domainEvents);
+    }
+
+    /**
+     * Очищает список событий после их успешного сохранения инфраструктурным адаптером.
+     */
+    public void clearDomainEvents() {
+        this.domainEvents.clear();
     }
 
     // --- Геттеры ---

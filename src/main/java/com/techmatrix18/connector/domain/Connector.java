@@ -2,6 +2,9 @@ package com.techmatrix18.connector.domain;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -25,6 +28,9 @@ public class Connector {
     private final Long version;
     private final ZonedDateTime createdAt;
     private ZonedDateTime updatedAt;
+
+    // Список событий, произошедших с агрегатом в памяти
+    private final List<Object> domainEvents = new ArrayList<>();
 
     /**
      * Конструктор для первичного создания (Бизнес-сценарий монтажа нового кабеля)
@@ -122,6 +128,20 @@ public class Connector {
         }
 
         this.updatedAt = java.time.ZonedDateTime.now();
+    }
+
+    /**
+     * Возвращает неизменяемый список произошедших доменных событий.
+     */
+    public List<Object> getDomainEvents() {
+        return Collections.unmodifiableList(domainEvents);
+    }
+
+    /**
+     * Очищает список событий после их успешного сохранения инфраструктурным адаптером.
+     */
+    public void clearDomainEvents() {
+        this.domainEvents.clear();
     }
 
     // --- Геттеры для портов и мапперов ---

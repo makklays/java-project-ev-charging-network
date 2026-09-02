@@ -1,5 +1,8 @@
 package com.techmatrix18.user_wallet.infrastructure.db;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.techmatrix18.building_blocks.infrastructure.db.JpaOutboxEventRepository;
+import com.techmatrix18.building_blocks.infrastructure.db.OutboxEventEntity;
 import com.techmatrix18.user_wallet.application.port.out.UserWalletRepository;
 import com.techmatrix18.user_wallet.domain.UserWallet;
 import org.springframework.stereotype.Component;
@@ -20,10 +23,14 @@ import java.util.UUID;
 public class UserWalletRepositoryAdapter implements UserWalletRepository {
 
     private final JpaUserWalletRepository repository;
+    private final JpaOutboxEventRepository outboxRepository;
+    private final ObjectMapper objectMapper;
 
     // Внедряем Spring Data репозиторий через конструктор
-    public UserWalletRepositoryAdapter(JpaUserWalletRepository repository) {
+    public UserWalletRepositoryAdapter(JpaUserWalletRepository repository, JpaOutboxEventRepository outboxRepository, ObjectMapper objectMapper) {
         this.repository = repository;
+        this.outboxRepository = outboxRepository;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -34,7 +41,31 @@ public class UserWalletRepositoryAdapter implements UserWalletRepository {
         // 2. Сохраняем в базу данных через Spring Data
         UserWalletEntity savedEntity = repository.save(entity);
 
-        // 3. Возвращаем обратно доменный объект
+        // 3. [OUTBOX EVENT]: Цикл перебора и сохранения доменных событий в таблицу Outbox
+        for (Object event : wallet.getDomainEvents()) {
+            try {
+                // Превращаем доменное событие в строку JSON
+                String jsonPayload = objectMapper.writeValueAsString(event);
+
+                // Заполняем системную сущность Outbox
+                OutboxEventEntity outboxEntry = new OutboxEventEntity();
+                outboxEntry.setAggregateId(wallet.getId().toString()); // UUID кошелька
+                outboxEntry.setAggregateType("USER_WALLET"); // Сформирует Kafka топик: user-wallet-events
+                outboxEntry.setEventType(event.getClass().getSimpleName()); // Имя класса события
+                outboxEntry.setPayload(jsonPayload);
+
+                // Сохраняем в единую таблицу outbox_events в рамках текущей транзакции
+                outboxRepository.save(outboxEntry);
+
+            } catch (Exception e) {
+                throw new RuntimeException("Ошибка автоматической записи события кошелька в Outbox", e);
+            }
+        }
+
+        // 4. [OUTBOX EVENT]: Очищаем события в оперативной памяти доменного объекта
+        wallet.clearDomainEvents();
+
+        // 5. Возвращаем обратно доменный объект
         return savedEntity.toDomain();
     }
 

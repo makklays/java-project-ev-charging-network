@@ -1,5 +1,8 @@
 package com.techmatrix18.evse_point.infrastructure.db;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.techmatrix18.building_blocks.infrastructure.db.JpaOutboxEventRepository;
+import com.techmatrix18.building_blocks.infrastructure.db.OutboxEventEntity;
 import com.techmatrix18.evse_point.application.port.out.EvsePointRepository;
 import com.techmatrix18.evse_point.domain.EvsePoint;
 import org.springframework.stereotype.Component;
@@ -19,10 +22,16 @@ import java.util.Optional;
 public class EvsePointRepositoryAdapter implements EvsePointRepository {
 
     private final JpaEvsePointRepository repository;
+    private final JpaOutboxEventRepository outboxRepository;
+    private final ObjectMapper objectMapper;
 
     // Внедряем Spring Data репозиторий через конструктор
-    public EvsePointRepositoryAdapter(JpaEvsePointRepository repository) {
+    public EvsePointRepositoryAdapter(JpaEvsePointRepository repository,
+                                      JpaOutboxEventRepository outboxRepository,
+                                      ObjectMapper objectMapper) {
         this.repository = repository;
+        this.outboxRepository = outboxRepository;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -32,6 +41,30 @@ public class EvsePointRepositoryAdapter implements EvsePointRepository {
 
         // Сохраняем в базу данных через Spring Data
         EvsePointEntity savedEntity = repository.save(entity);
+
+        // [OUTBOX EVENT]: Цикл перебора и сохранения доменных событий в таблицу Outbox
+        for (Object event : evsePoint.getDomainEvents()) {
+            try {
+                // Превращаем доменное событие в строку JSON
+                String jsonPayload = objectMapper.writeValueAsString(event);
+
+                // Заполняем системную сущность Outbox
+                OutboxEventEntity outboxEntry = new OutboxEventEntity();
+                outboxEntry.setAggregateId(evsePoint.getId().toString()); // ID физического порта
+                outboxEntry.setAggregateType("EVSE_POINT"); // Авто-топик в Kafka: evse-point-events
+                outboxEntry.setEventType(event.getClass().getSimpleName()); // Имя класса (например, EvseStatusChangedEvent)
+                outboxEntry.setPayload(jsonPayload);
+
+                // Сохраняем запись в рамках текущей бизнес-транзакции СУБД
+                outboxRepository.save(outboxEntry);
+
+            } catch (Exception e) {
+                throw new RuntimeException("Ошибка автоматической записи события порта EVSE в Outbox", e);
+            }
+        }
+
+        // [OUTBOX EVENT]: Стираем отработанные события из памяти доменного объекта
+        evsePoint.clearDomainEvents();
 
         // Возвращаем обратно чистую доменную модель
         return savedEntity.toDomain();

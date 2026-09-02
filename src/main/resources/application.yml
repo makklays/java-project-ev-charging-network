@@ -1,0 +1,90 @@
+# ===================================================================
+# СИСТЕМНЫЕ НАСТРОЙКИ СЕРВЕРА
+# ===================================================================
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  shutdown: graceful # Плавное завершение работы (сервер дождется окончания активных зарядок и транзакций)
+
+# ===================================================================
+# ОСНОВНЫЕ НАСТРОЙКИ SPRING BOOT
+# ===================================================================
+spring:
+  application:
+    name: ev-charging-network-service
+
+  # --- НАСТРОЙКИ БАЗЫ ДАННЫХ (ЕДИНАЯ СУБД POSTGRESQL) ---
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ev_network_db
+    username: techmatrix_user
+    password: techmatrix_secure_password
+    driver-class-name: org.postgresql.Driver
+    # Оптимизация пула подключений HikariCP для финтех-нагрузок
+    hikari:
+      pool-name: EvNetworkHikariPool
+      maximum-pool-size: 20       # Максимум 20 параллельных соединений к БД
+      minimum-idle: 5             # Минимум 5 постоянно удерживаемых соединений
+      idle-timeout: 300000        # 5 минут удержания простаивающего соединения
+      max-lifetime: 1800000       # 30 минут жизни одного соединения в пуле
+      connection-timeout: 20000   # 20 секунд ожидания свободного соединения из пула
+
+  # --- НАСТРОЙКИ JPA / HIBERNATE 6+ ---
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate # Строго validate в продакшене. Таблицы меняются ТОЛЬКО через Flyway/Liquibase миграции.
+    show-sql: false      # Выключаем в прод-режиме, чтобы не забивать логи миллионами строк вставок
+    properties:
+      hibernate:
+        format_sql: false
+        default_batch_fetch_size: 20 # Оптимизация N+1 запросов при подгрузке сущностей (станций, кабелей)
+        jdbc:
+          batch_size: 50             # Пакетное сохранение для оптимизации работы Outbox-таблицы
+
+  # --- НАСТРОЙКИ ТРАНСПОРТНОГО СЛОЯ BROKER KAFKA ---
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all # Ожидание подтверждения от всех реплик Kafka (Гарантия доставки)
+      compression-type: lz4
+      batch-size: 16384
+      buffer-memory: 33554432
+      properties:
+        enable.idempotence: true # Идемпотентный продюсер на уровне сетевых пакетов
+        max.in.flight.requests.per.connection: 5
+    consumer:
+      group-id: ev-charging-network-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+      enable-auto-commit: false # Ручное подтверждение смещений (At-Least-Once)
+    listener:
+      ack-mode: manual_immediate
+
+  # --- НАСТРОЙКИ ПЛАНИРОВЩИКА (SPRING TASK SCHEDULING) ---
+  # Настройка пула потоков для аннотации @Scheduled, чтобы Outbox и Идемпотентность не блокировали друг друга
+  task:
+    scheduling:
+      pool:
+        size: 4 # 4 выделенных параллельных потока для фоновых джоб
+      thread-name-prefix: ev-background-job-
+
+# ===================================================================
+# УПРАВЛЕНИЕ ЛОГИРОВАНИЕМ (LOGGING CONFIGURATION)
+# ===================================================================
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  level:
+    root: INFO
+    # Логируем только важные предупреждения от фреймворка
+    org.springframework: INFO
+    org.hibernate: WARN
+    # Включаем DEBUG для вашего технического ядра, чтобы видеть как перехватываются X-Idempotency-Key
+    com.techmatrix18.building_blocks.infrastructure.interceptors: DEBUG
+    # Включаем DEBUG для шедулера, чтобы отслеживать батчи отправки доменных событий в Kafka
+    com.techmatrix18.building_blocks.infrastructure.schedule: DEBUG
+

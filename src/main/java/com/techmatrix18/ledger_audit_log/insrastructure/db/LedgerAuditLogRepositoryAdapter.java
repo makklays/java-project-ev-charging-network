@@ -1,5 +1,8 @@
 package com.techmatrix18.ledger_audit_log.insrastructure.db;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.techmatrix18.building_blocks.infrastructure.db.JpaOutboxEventRepository;
+import com.techmatrix18.building_blocks.infrastructure.db.OutboxEventEntity;
 import com.techmatrix18.ledger_audit_log.application.port.out.LedgerAuditLogRepository;
 import com.techmatrix18.ledger_audit_log.domain.LedgerAuditLog;
 import org.springframework.stereotype.Component;
@@ -20,9 +23,13 @@ import java.util.Optional;
 public class LedgerAuditLogRepositoryAdapter implements LedgerAuditLogRepository {
 
     private final JpaBillingLedgerRepository repository;
+    private final JpaOutboxEventRepository outboxRepository;
+    private final ObjectMapper objectMapper;
 
-    public LedgerAuditLogRepositoryAdapter(JpaBillingLedgerRepository repository) {
+    public LedgerAuditLogRepositoryAdapter(JpaBillingLedgerRepository repository, JpaOutboxEventRepository outboxRepository, ObjectMapper objectMapper) {
         this.repository = repository;
+        this.outboxRepository = outboxRepository;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -32,6 +39,28 @@ public class LedgerAuditLogRepositoryAdapter implements LedgerAuditLogRepository
 
         // Выполняем строго операцию SQL INSERT в базу данных
         LedgerAuditLogEntity savedEntity = repository.save(entity);
+
+        // [OUTBOX EVENT]: Универсальный цикл перебора доменных событий проводки
+        for (Object event : ledgerLog.getDomainEvents()) {
+            try {
+                String jsonPayload = objectMapper.writeValueAsString(event);
+
+                OutboxEventEntity outboxEntry = new OutboxEventEntity();
+                outboxEntry.setAggregateId(ledgerLog.getId().toString()); // ID проводки
+                outboxEntry.setAggregateType("LEDGER_AUDIT");             // Kafka топик: ledger-audit-events
+                outboxEntry.setEventType(event.getClass().getSimpleName()); // Имя класса: LedgerEntryLoggedEvent
+                outboxEntry.setPayload(jsonPayload);
+
+                // Сохраняем в таблицу outbox_events через чистый Spring Data репозиторий
+                outboxRepository.save(outboxEntry);
+
+            } catch (Exception e) {
+                throw new RuntimeException("Ошибка автоматической записи финансовой проводки в Outbox", e);
+            }
+        }
+
+        // [OUTBOX EVENT]: Стираем отработанные события из памяти доменного объекта
+        ledgerLog.clearDomainEvents();
 
         // Возвращаем доменную модель со сгенерированным СУБД первичным ключом ID
         return savedEntity.toDomain();

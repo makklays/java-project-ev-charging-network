@@ -3,6 +3,9 @@ package com.techmatrix18.charging_session.domain;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -32,6 +35,9 @@ public class ChargingSession {
     private final Long version;
     private final ZonedDateTime createdAt;
     private ZonedDateTime updatedAt;
+
+    // Список событий, произошедших с агрегатом в памяти
+    private final List<Object> domainEvents = new ArrayList<>();
 
     /**
      * Конструктор для первичного создания (Старт зарядки пользователем через приложение)
@@ -161,6 +167,20 @@ public class ChargingSession {
         if (this.totalKwhConsumed.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("Consumed energy cannot be negative");
         }
+    }
+
+    /**
+     * Возвращает неизменяемый список произошедших доменных событий.
+     */
+    public List<Object> getDomainEvents() {
+        return Collections.unmodifiableList(domainEvents);
+    }
+
+    /**
+     * Очищает список событий после их успешного сохранения инфраструктурным адаптером.
+     */
+    public void clearDomainEvents() {
+        this.domainEvents.clear();
     }
 
     // --- Геттеры для портов и мапперов ---

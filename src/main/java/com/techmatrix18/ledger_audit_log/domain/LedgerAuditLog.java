@@ -2,6 +2,9 @@ package com.techmatrix18.ledger_audit_log.domain;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -29,6 +32,9 @@ public class LedgerAuditLog {
     private final String auditComment;
     private final ZonedDateTime createdAt;
     private final String createdBy;
+
+    // Список событий, произошедших с агрегатом в памяти
+    private final List<Object> domainEvents = new ArrayList<>();
 
     // Конструктор для первичного создания проводки (Вызывается биллинг-движком при фиксации списания/начисления)
     public LedgerAuditLog(Long userId, Long chargingInvoiceId, String operationType, BigDecimal amount,
@@ -90,6 +96,20 @@ public class LedgerAuditLog {
         if (this.deltaMinutes < 0) {
             throw new IllegalArgumentException("Time delta cannot be negative");
         }
+    }
+
+    /**
+     * Возвращает неизменяемый список произошедших доменных событий.
+     */
+    public List<Object> getDomainEvents() {
+        return Collections.unmodifiableList(domainEvents);
+    }
+
+    /**
+     * Очищает список событий после их успешного сохранения инфраструктурным адаптером.
+     */
+    public void clearDomainEvents() {
+        this.domainEvents.clear();
     }
 
     // --- Геттеры для портов и мапперов (Иммутабельность сохранена, сеттеров нет) ---
