@@ -28,7 +28,7 @@ public interface JpaIdempotencyRecordRepository extends JpaRepository<Idempotenc
      * @return Количество удаленных записей
      */
     @Modifying
-    @Query("DELETE FROM IdempotencyEntity e WHERE e.expiresAt < :now")
+    @Query("DELETE FROM IdempotencyRecordEntity e WHERE e.expiresAt < :now")
     int deleteExpiredRecords(@Param("now") ZonedDateTime now);
 }
 

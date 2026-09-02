@@ -1,5 +1,6 @@
 package com.techmatrix18.connector.infrastructure.http;
 
+import com.techmatrix18.building_blocks.infrastructure.interceptors.RequireIdempotency;
 import com.techmatrix18.connector.application.command.*;
 import com.techmatrix18.connector.application.port.in.*;
 import com.techmatrix18.connector.application.port.out.ConnectorRepository;
@@ -57,6 +58,7 @@ public class ConnectorController {
 
     // Монтаж и регистрация нового зарядного кабеля на точке EVSE
     @PostMapping
+    @RequireIdempotency
     public ResponseEntity<Void> registerConnector(@Valid @RequestBody RegisterConnectorCommand command) {
         registerConnectorUseCase.registerConnector(command);
         return ResponseEntity.status(HttpStatus.CREATED).build(); // HTTP 201 Created
@@ -71,6 +73,7 @@ public class ConnectorController {
 
     // Сигнал IoT: Начало протекания тока через кабель (перевод в статус CHARGING)
     @PostMapping("/occupy")
+    @RequireIdempotency
     public ResponseEntity<Void> occupyConnector(@Valid @RequestBody OccupyConnectorCommand command) {
         occupyConnectorUseCase.occupyConnector(command);
         return ResponseEntity.noContent().build(); // HTTP 204 No Content
@@ -78,6 +81,7 @@ public class ConnectorController {
 
     // Сигнал IoT: Возврат пистолета в ложемент станции, кабель свободен (перевод в статус AVAILABLE)
     @PostMapping("/free")
+    @RequireIdempotency
     public ResponseEntity<Void> freeConnector(@Valid @RequestBody FreeConnectorCommand command) {
         freeConnectorUseCase.freeConnector(command);
         return ResponseEntity.noContent().build(); // HTTP 204 No Content

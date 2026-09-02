@@ -1,5 +1,6 @@
 package com.techmatrix18.charging_tariff.infrastructure.http;
 
+import com.techmatrix18.building_blocks.infrastructure.interceptors.RequireIdempotency;
 import com.techmatrix18.charging_tariff.application.command.CreateTariffCommand;
 import com.techmatrix18.charging_tariff.application.command.DeleteTariffCommand;
 import com.techmatrix18.charging_tariff.application.command.UpdateTariffPricingCommand;
@@ -60,6 +61,7 @@ public class ChargingTariffController {
 
     // Создание и заведение новой тарифной зоны (сетки) для коннектора
     @PostMapping
+    @RequireIdempotency
     public ResponseEntity<Void> createTariff(@Valid @RequestBody CreateTariffCommand command) {
         createTariffUseCase.createTariff(command);
         return ResponseEntity.status(HttpStatus.CREATED).build(); // HTTP 201 Created

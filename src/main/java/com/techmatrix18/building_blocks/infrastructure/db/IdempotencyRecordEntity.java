@@ -73,6 +73,8 @@ public class IdempotencyRecordEntity {
     public String getIdempotencyKey() {
         return idempotencyKey;
     }
+
+    public String getRequestPayloadHash() { return this.requestPayloadHash; }
     public void setRequestPayloadHash(String requestPayloadHash) {
         this.requestPayloadHash = requestPayloadHash;
     }

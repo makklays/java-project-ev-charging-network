@@ -1,5 +1,6 @@
 package com.techmatrix18.user.infrastructure.http;
 
+import com.techmatrix18.building_blocks.infrastructure.interceptors.RequireIdempotency;
 import com.techmatrix18.user.application.command.RegisterUserCommand;
 import com.techmatrix18.user.application.command.UpdateUserCommand;
 import com.techmatrix18.user.application.port.in.*;
@@ -54,6 +55,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
+    @RequireIdempotency
     public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterUserRequest request) {
         RegisterUserCommand command = request.toCommand();
         User user = registerUserUseCase.register(command);
@@ -115,6 +117,7 @@ public class UserController {
 
     // Сброс забытого пароля по временному токену
     @PostMapping("/reset-password")
+    @RequireIdempotency
     public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         // Запускает валидацию @NotBlank для токена и кастомную @ValidPassword для пароля
         resetPasswordUseCase.resetPassword(request.toCommand());

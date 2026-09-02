@@ -1,5 +1,6 @@
 package com.techmatrix18.charging_station.infrastructure.http;
 
+import com.techmatrix18.building_blocks.infrastructure.interceptors.RequireIdempotency;
 import com.techmatrix18.charging_station.application.command.*;
 import com.techmatrix18.charging_station.application.port.in.*;
 import com.techmatrix18.charging_station.application.port.out.ChargingStationRepository;
@@ -63,6 +64,7 @@ public class ChargingStationController {
 
     // Регистрация новой зарядной локации в сети
     @PostMapping
+    @RequireIdempotency
     public ResponseEntity<Void> registerStation(@Valid @RequestBody RegisterStationCommand command) {
         registerStationUseCase.registerStation(command);
         return ResponseEntity.status(HttpStatus.CREATED).build(); // HTTP 201 Created
@@ -105,6 +107,7 @@ public class ChargingStationController {
 
     // Динамическая балансировка общей доступной мощности хаба
     @PutMapping("/rebalance")
+    @RequireIdempotency
     public ResponseEntity<Void> rebalancePower(@Valid @RequestBody RebalanceStationPowerCommand command) {
         rebalanceStationPowerUseCase.rebalanceStationPower(command);
         return ResponseEntity.noContent().build(); // HTTP 204 No Content

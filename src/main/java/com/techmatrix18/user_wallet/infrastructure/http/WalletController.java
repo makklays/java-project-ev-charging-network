@@ -1,5 +1,6 @@
 package com.techmatrix18.user_wallet.infrastructure.http;
 
+import com.techmatrix18.building_blocks.infrastructure.interceptors.RequireIdempotency;
 import com.techmatrix18.user_wallet.application.port.in.*;
 import com.techmatrix18.user_wallet.application.port.out.UserWalletRepository;
 import com.techmatrix18.user_wallet.domain.UserWallet;
@@ -63,6 +64,7 @@ public class WalletController {
 
     // Пополнение баланса кошелька (вызывается после успешного ответа платежной системы)
     @PostMapping("/deposit")
+    @RequireIdempotency
     public ResponseEntity<Void> depositMoney(@Valid @RequestBody DepositMoneyRequest request) {
         // Преобразуем проверенный Request в доменную команду
         depositMoneyUseCase.depositMoney(request.toCommand());
@@ -71,6 +73,7 @@ public class WalletController {
 
     // Периодическое списание за энергию во время зарядки (вызывается IoT-модулем или Kafka-воркером)
     @PostMapping("/debit-energy")
+    @RequireIdempotency
     public ResponseEntity<Void> debitEnergy(@Valid @RequestBody DebitChargingEnergyRequest request) {
         debitChargingEnergyUseCase.debitChargingEnergy(request.toCommand());
         return ResponseEntity.noContent().build(); // HTTP 204 No Content
@@ -78,6 +81,7 @@ public class WalletController {
 
     // Списание штрафа за простой (оккупация кабеля после окончания зарядки)
     @PostMapping("/debit-idle")
+    @RequireIdempotency
     public ResponseEntity<Void> debitIdleFee(@Valid @RequestBody DebitIdleFeeRequest request) {
         debitIdleFeeUseCase.debitIdleFee(request.toCommand());
         return ResponseEntity.noContent().build(); // HTTP 204 No Content
@@ -85,6 +89,7 @@ public class WalletController {
 
     // Финальное закрытие и списание по бухгалтерскому инвойсу сессии
     @PostMapping("/settle-invoice")
+    @RequireIdempotency
     public ResponseEntity<Void> settleInvoice(@Valid @RequestBody SettleFinalInvoiceRequest request) {
         settleFinalInvoiceUseCase.settleFinalInvoice(request.toCommand());
         return ResponseEntity.noContent().build(); // HTTP 204 No Content
@@ -92,6 +97,7 @@ public class WalletController {
 
     // Вывод (возврат) средств из кошелька на банковскую карту пользователя
     @PostMapping("/withdraw")
+    @RequireIdempotency
     public ResponseEntity<Void> withdrawMoney(@Valid @RequestBody WithdrawMoneyRequest request) {
         withdrawMoneyUseCase.withdrawMoney(request.toCommand());
         return ResponseEntity.noContent().build(); // HTTP 204 No Content

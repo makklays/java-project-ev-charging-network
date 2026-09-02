@@ -1,5 +1,6 @@
 package com.techmatrix18.charging_invoice.infrastructure.http;
 
+import com.techmatrix18.building_blocks.infrastructure.interceptors.RequireIdempotency;
 import com.techmatrix18.charging_invoice.application.command.DisputeInvoiceCommand;
 import com.techmatrix18.charging_invoice.application.command.IssueInvoiceCommand;
 import com.techmatrix18.charging_invoice.application.command.MarkInvoiceAsFailedCommand;
@@ -60,6 +61,7 @@ public class ChargingInvoiceController {
 
     // Системный триггер: Генерация и выставление нового счета с НДС (вызывается биллинг-движком)
     @PostMapping
+    @RequireIdempotency
     public ResponseEntity<Void> issueInvoice(@Valid @RequestBody IssueInvoiceCommand command) {
         issueInvoiceUseCase.issueInvoice(command);
         return ResponseEntity.status(HttpStatus.CREATED).build(); // HTTP 201 Created
@@ -67,6 +69,7 @@ public class ChargingInvoiceController {
 
     // Вебхук эквайринга: Фиксация успешного списания денег (перевод в статус PAID)
     @PostMapping("/pay")
+    @RequireIdempotency
     public ResponseEntity<Void> payInvoice(@Valid @RequestBody PayInvoiceCommand command) {
         payInvoiceUseCase.payInvoice(command);
         return ResponseEntity.noContent().build(); // HTTP 204 No Content
@@ -74,6 +77,7 @@ public class ChargingInvoiceController {
 
     // Вебхук эквайринга: Сбой транзакции / недостаточный баланс кошелька (перевод в статус FAILED)
     @PostMapping("/fail")
+    @RequireIdempotency
     public ResponseEntity<Void> markAsFailed(@Valid @RequestBody MarkInvoiceAsFailedCommand command) {
         markInvoiceAsFailedUseCase.markAsFailed(command);
         return ResponseEntity.noContent().build(); // HTTP 204 No Content

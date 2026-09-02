@@ -1,5 +1,6 @@
 package com.techmatrix18.ledger_audit_log.insrastructure.http;
 
+import com.techmatrix18.building_blocks.infrastructure.interceptors.RequireIdempotency;
 import com.techmatrix18.ledger_audit_log.application.command.ArchiveOldLedgerEntriesCommand;
 import com.techmatrix18.ledger_audit_log.application.command.CreateLedgerCorrectionCommand;
 import com.techmatrix18.ledger_audit_log.application.command.LogLedgerEntryCommand;
@@ -54,6 +55,7 @@ public class LedgerAuditLogController {
 
     // Системный триггер: Прямая фиксация стандартной Append-Only проводки (вызывается биллинг-модулями)
     @PostMapping
+    @RequireIdempotency
     public ResponseEntity<Void> logLedgerEntry(@Valid @RequestBody LogLedgerEntryCommand command) {
         logLedgerEntryUseCase.logLedgerEntry(command);
         return ResponseEntity.status(HttpStatus.CREATED).build(); // HTTP 201 Created
@@ -61,6 +63,7 @@ public class LedgerAuditLogController {
 
     // Административный триггер: Ручное сторнирование (исправление) баланса без изменения старой истории
     @PostMapping("/corrections")
+    @RequireIdempotency
     public ResponseEntity<Void> createLedgerCorrection(@Valid @RequestBody CreateLedgerCorrectionCommand command) {
         // Вызов бизнес-сервиса исправления баланса
         createLedgerCorrectionUseCase.createLedgerCorrection(command);

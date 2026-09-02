@@ -1,5 +1,6 @@
 package com.techmatrix18.evse_point.infrastructure.http;
 
+import com.techmatrix18.building_blocks.infrastructure.interceptors.RequireIdempotency;
 import com.techmatrix18.evse_point.application.command.*;
 import com.techmatrix18.evse_point.application.port.in.*;
 import com.techmatrix18.evse_point.application.port.out.EvsePointRepository;
@@ -60,6 +61,7 @@ public class EvsePointController {
 
     // Монтаж и инициализация нового зарядного порта (EVSE) на станции
     @PostMapping
+    @RequireIdempotency
     public ResponseEntity<Void> createEvsePoint(@Valid @RequestBody CreateEvsePointCommand command) {
         createEvsePointUseCase.createEvsePoint(command);
         return ResponseEntity.status(HttpStatus.CREATED).build(); // HTTP 201 Created
@@ -74,6 +76,7 @@ public class EvsePointController {
 
     // Сигнал IoT: Успешный старт транзакции и запуск подачи тока (перевод в статус CHARGING)
     @PostMapping("/start-charging")
+    @RequireIdempotency
     public ResponseEntity<Void> startCharging(@Valid @RequestBody StartEvseChargingCommand command) {
         startEvseChargingUseCase.startCharging(command);
         return ResponseEntity.noContent().build(); // HTTP 204 No Content
@@ -95,6 +98,7 @@ public class EvsePointController {
 
     // Сигнал IoT: Отключение кабеля водителем, завершение сессии (перевод в статус AVAILABLE)
     @PostMapping("/release")
+    @RequireIdempotency
     public ResponseEntity<Void> releaseEvsePoint(@Valid @RequestBody ReleaseEvsePointCommand command) {
         releaseEvsePointUseCase.releaseEvsePoint(command);
         return ResponseEntity.noContent().build(); // HTTP 204 No Content

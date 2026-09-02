@@ -1,5 +1,6 @@
 package com.techmatrix18.charging_session.infrastructure.http;
 
+import com.techmatrix18.building_blocks.infrastructure.interceptors.RequireIdempotency;
 import com.techmatrix18.charging_session.application.command.*;
 import com.techmatrix18.charging_session.application.port.in.*;
 import com.techmatrix18.charging_session.application.port.out.ChargingSessionRepository;
@@ -57,6 +58,7 @@ public class ChargingSessionController {
 
     // Инициализация и запуск новой зарядной сессии (вызывается водителем из приложения)
     @PostMapping
+    @RequireIdempotency
     public ResponseEntity<Void> startSession(@Valid @RequestBody StartChargingSessionCommand command) {
         startChargingSessionUseCase.startSession(command);
         return ResponseEntity.status(HttpStatus.CREATED).build(); // HTTP 201 Created
@@ -78,6 +80,7 @@ public class ChargingSessionController {
 
     // Штатное завершение зарядной сессии (отключение кабеля или кнопка Стоп в приложении)
     @PostMapping("/complete")
+    @RequireIdempotency
     public ResponseEntity<Void> completeSession(@Valid @RequestBody CompleteChargingSessionCommand command) {
         completeChargingSessionUseCase.completeSession(command);
         return ResponseEntity.noContent().build(); // HTTP 204 No Content
@@ -85,6 +88,7 @@ public class ChargingSessionController {
 
     // Аварийное прерывание сессии при критических сбоях оборудования или IoT-связи
     @PostMapping("/fail")
+    @RequireIdempotency
     public ResponseEntity<Void> failSession(@Valid @RequestBody FailChargingSessionCommand command) {
         failChargingSessionUseCase.failSession(command);
         return ResponseEntity.noContent().build(); // HTTP 204 No Content

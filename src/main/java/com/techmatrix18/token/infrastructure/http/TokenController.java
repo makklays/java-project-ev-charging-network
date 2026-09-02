@@ -1,5 +1,6 @@
 package com.techmatrix18.token.infrastructure.http;
 
+import com.techmatrix18.building_blocks.infrastructure.interceptors.RequireIdempotency;
 import com.techmatrix18.token.application.command.IssueTokenCommand;
 import com.techmatrix18.token.application.command.RefreshTokenCommand;
 import com.techmatrix18.token.application.command.RevokeTokenCommand;
@@ -42,6 +43,7 @@ public class TokenController {
      * POST /api/v1/auth/tokens (Вход / Создание сессии)
      */
     @PostMapping("/tokens")
+    @RequireIdempotency
     public ResponseEntity<TokenResponse> issueTokens(@Valid @RequestBody IssueTokenRequest request) {
         // Сюда код зайдет ТОЛЬКО если все аннотации в request успешны.
         // Клиент гарантированно получит 400 Bad Request, если данные неверны.
@@ -65,6 +67,7 @@ public class TokenController {
      * POST /api/v1/auth/logout (Разлогин / Отзыв токена)
      */
     @PostMapping("/logout")
+    @RequireIdempotency
     public ResponseEntity<Void> revokeToken(@Valid @RequestBody RevokeTokenRequest request) {
         RevokeTokenCommand command = request.toCommand();
         revokeTokenUseCase.revokeToken(command);
