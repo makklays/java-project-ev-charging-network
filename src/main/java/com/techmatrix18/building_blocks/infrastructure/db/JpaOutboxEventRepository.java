@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * JpaOutboxEventRepository
@@ -20,7 +21,7 @@ import java.util.List;
  */
 
 @Repository
-public interface JpaOutboxEventRepository extends JpaRepository<OutboxEventEntity, Long> {
+public interface JpaOutboxEventRepository extends JpaRepository<OutboxEventEntity, UUID> {
 
     /**
      * Выбирает список неотправленных событий, отсортированных по времени создания (FIFO).

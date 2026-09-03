@@ -45,5 +45,12 @@ public class UserRepositoryAdapter implements UserRepository {
 
     @Override
     public boolean existsByUsername(String username) { return repository.existsByUsername(username); }
+
+    @Override
+    public Optional<User> findByResetToken(String token) {
+        // Ищем Entity в базе через Spring Data и маппим результат в чистый домен
+        return repository.findByPasswordResetToken(token) // или .findByResetToken(token) в зависимости от имени в JpaUserRepository
+                .map(UserEntity::toDomain);
+    }
 }
 

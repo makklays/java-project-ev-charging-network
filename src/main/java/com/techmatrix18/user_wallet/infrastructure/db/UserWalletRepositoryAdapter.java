@@ -49,7 +49,7 @@ public class UserWalletRepositoryAdapter implements UserWalletRepository {
 
                 // Заполняем системную сущность Outbox
                 OutboxEventEntity outboxEntry = new OutboxEventEntity();
-                outboxEntry.setAggregateId(wallet.getId().toString()); // UUID кошелька
+                outboxEntry.setAggregateId(wallet.getId()); // UUID кошелька
                 outboxEntry.setAggregateType("USER_WALLET"); // Сформирует Kafka топик: user-wallet-events
                 outboxEntry.setEventType(event.getClass().getSimpleName()); // Имя класса события
                 outboxEntry.setPayload(jsonPayload);

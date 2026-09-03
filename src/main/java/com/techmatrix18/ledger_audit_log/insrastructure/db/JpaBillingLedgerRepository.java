@@ -32,7 +32,9 @@ public interface JpaBillingLedgerRepository extends JpaRepository<LedgerAuditLog
 
     // Высокопроизводительное пакетное удаление заархивированных строк из операционной таблицы PostgreSQL
     @Modifying
-    @Query("DELETE FROM BillingLedgerAuditLogEntity e WHERE e.id IN :ids")
+    @Query(value = "DELETE FROM ledger_audit_logs WHERE id IN :ids", nativeQuery = true)
     void deleteEntriesByIds(@Param("ids") List<Long> ids);
+
+    void deleteByIdIn(List<Long> ids);
 }
 

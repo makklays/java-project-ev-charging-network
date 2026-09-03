@@ -28,7 +28,7 @@ public class UpdateUserService implements UpdateUserUseCase {
 
     @Override
     @Transactional // Гарантирует атомарность операции в БД
-    public User updateProfile(UpdateUserCommand command) {
+    public User updateUser(UpdateUserCommand command) {
         // 1. Получаем чистый доменный объект из базы данных
         User user = userRepository.findById(command.userId())
             .orElseThrow(() -> new UserNotFoundException(command.userId()));

@@ -7,6 +7,7 @@ import com.techmatrix18.charging_invoice.application.port.out.ChargingInvoiceRep
 import com.techmatrix18.charging_invoice.domain.ChargingInvoice;
 import org.springframework.stereotype.Component;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * ChargingInvoiceRepositoryAdapter
@@ -50,7 +51,8 @@ public class ChargingInvoiceRepositoryAdapter implements ChargingInvoiceReposito
 
                 // Заполняем системную сущность Outbox
                 OutboxEventEntity outboxEntry = new OutboxEventEntity();
-                outboxEntry.setAggregateId(invoice.getId().toString()); // ID инвойса/счета
+                String invoiceIdStr = String.valueOf(invoice.getId());
+                outboxEntry.setAggregateId(UUID.nameUUIDFromBytes(invoiceIdStr.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
                 outboxEntry.setAggregateType("CHARGING_INVOICE"); // Сформирует Kafka топик: charging-invoice-events
                 outboxEntry.setEventType(event.getClass().getSimpleName()); // Имя класса (например, InvoicePaidEvent)
                 outboxEntry.setPayload(jsonPayload);

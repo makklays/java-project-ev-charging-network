@@ -7,6 +7,7 @@ import com.techmatrix18.connector.application.port.out.ConnectorRepository;
 import com.techmatrix18.connector.domain.Connector;
 import org.springframework.stereotype.Component;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * ConnectorRepositoryAdapter
@@ -50,7 +51,8 @@ public class ConnectorRepositoryAdapter implements ConnectorRepository {
 
                 // Заполняем системную сущность Outbox
                 OutboxEventEntity outboxEntry = new OutboxEventEntity();
-                outboxEntry.setAggregateId(connector.getId().toString()); // ID физического коннектора
+                String connectorIdStr = String.valueOf(connector.getId());
+                outboxEntry.setAggregateId(UUID.nameUUIDFromBytes(connectorIdStr.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
                 outboxEntry.setAggregateType("CONNECTOR"); // Сформирует Kafka топик: connector-events
                 outboxEntry.setEventType(event.getClass().getSimpleName()); // Имя класса (например, ConnectorStatusChangedEvent)
                 outboxEntry.setPayload(jsonPayload);

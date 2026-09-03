@@ -43,7 +43,7 @@ public class UserEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    private String gender;
+    private Gender gender;
 
     @Column(name = "avatar_url")
     private String avatarUrl;
@@ -95,7 +95,7 @@ public class UserEntity {
         entity.baseRole = user.getBaseRole();
         entity.mobile = user.getMobile();
         entity.nickname = user.getNickname();
-        entity.gender = user.getGender() != null ? user.getGender().name() : null;
+        entity.gender = user.getGender() != null ? user.getGender() : null;
         entity.avatarUrl = user.getAvatarUrl();
         entity.birthDate = user.getBirthDate();
         entity.bio = user.getBio();
@@ -115,7 +115,7 @@ public class UserEntity {
                 this.baseRole,
                 this.mobile,
                 this.nickname,
-                this.gender != null ? Gender.valueOf(this.gender) : null,
+                this.gender != null ? this.gender : null,
                 this.avatarUrl,
                 this.birthDate,
                 this.bio,
@@ -146,8 +146,8 @@ public class UserEntity {
     public String getNickname() { return nickname; }
     public void setNickname(String nickname) { this.nickname = nickname; }
 
-    public String getGender() { return gender; }
-    public void setGender(String gender) { this.gender = gender; }
+    public Gender getGender() { return gender; }
+    public void setGender(Gender gender) { this.gender = gender; }
 
     public String getAvatarUrl() { return avatarUrl; }
     public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }

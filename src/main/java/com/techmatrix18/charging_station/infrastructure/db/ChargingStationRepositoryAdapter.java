@@ -7,6 +7,7 @@ import com.techmatrix18.charging_station.application.port.out.ChargingStationRep
 import com.techmatrix18.charging_station.domain.ChargingStation;
 import org.springframework.stereotype.Component;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * ChargingStationRepositoryAdapter
@@ -49,7 +50,8 @@ public class ChargingStationRepositoryAdapter implements ChargingStationReposito
 
                 // Заполняем системную сущность Outbox
                 OutboxEventEntity outboxEntry = new OutboxEventEntity();
-                outboxEntry.setAggregateId(station.getId().toString()); // ID зарядной станции
+                String stationIdStr = String.valueOf(station.getId());
+                outboxEntry.setAggregateId(UUID.nameUUIDFromBytes(stationIdStr.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
                 outboxEntry.setAggregateType("CHARGING_STATION"); // Сформирует Kafka топик: charging-station-events
                 outboxEntry.setEventType(event.getClass().getSimpleName()); // Имя класса (например, StationLifecycleChangedEvent)
                 outboxEntry.setPayload(jsonPayload);

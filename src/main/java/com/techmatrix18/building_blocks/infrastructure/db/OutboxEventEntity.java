@@ -2,6 +2,7 @@ package com.techmatrix18.building_blocks.infrastructure.db;
 
 import jakarta.persistence.*;
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
 /**
  * OutboxEventEntity
@@ -18,11 +19,11 @@ import java.time.ZonedDateTime;
 public class OutboxEventEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "id", nullable = false)
+    private UUID id;
 
-    @Column(name = "aggregate_id", nullable = false, length = 100)
-    private String aggregateId;
+    @Column(name = "aggregate_id", nullable = false, columnDefinition = "UUID")
+    private UUID aggregateId;
 
     @Column(name = "aggregate_type", nullable = false, length = 100)
     private String aggregateType;
@@ -36,9 +37,6 @@ public class OutboxEventEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private OutboxStatus status;
-
-    @Column(name = "error_message", columnDefinition = "TEXT")
-    private String errorMessage;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private ZonedDateTime createdAt;
@@ -65,11 +63,11 @@ public class OutboxEventEntity {
 
     // --- Геттеры и Сеттеры ---
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
-    public String getAggregateId() { return aggregateId; }
-    public void setAggregateId(String aggregateId) { this.aggregateId = aggregateId; }
+    public UUID getAggregateId() { return aggregateId; }
+    public void setAggregateId(UUID aggregateId) { this.aggregateId = aggregateId; }
 
     public String getAggregateType() { return aggregateType; }
     public void setAggregateType(String aggregateType) { this.aggregateType = aggregateType; }
@@ -82,9 +80,6 @@ public class OutboxEventEntity {
 
     public OutboxStatus getStatus() { return status; }
     public void setStatus(OutboxStatus status) { this.status = status; }
-
-    public String getErrorMessage() { return errorMessage; }
-    public void setErrorMessage(String errorMessage) { this.errorMessage = errorMessage; }
 
     public ZonedDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(ZonedDateTime createdAt) { this.createdAt = createdAt; }

@@ -36,6 +36,27 @@ public class LedgerAuditLog {
     // Список событий, произошедших с агрегатом в памяти
     private final List<Object> domainEvents = new ArrayList<>();
 
+    public LedgerAuditLog(Long userId, Long chargingInvoiceId, String operationType,
+                          BigDecimal amount, BigDecimal walletBalanceSnapshot, String auditComment) {
+        this.id = null; // Будет сгенерирован базой данных
+        this.userId = userId;
+        this.chargingInvoiceId = chargingInvoiceId;
+        this.operationType = operationType;
+        this.amount = amount;
+        this.walletBalanceSnapshot = walletBalanceSnapshot;
+        this.historicalPricePerKwh = BigDecimal.ZERO;
+        this.historicalTariffName = "DEFAULT_TARIFF";
+        this.deltaKwh = BigDecimal.ZERO;
+        this.deltaMinutes = 0;
+        this.totalMeterKwh = BigDecimal.ZERO;
+        this.auditComment = auditComment;
+        this.createdAt = ZonedDateTime.now();
+        this.createdBy = "SYSTEM";
+
+        // Также фиксируем доменное событие, которое мы настраивали ранее
+        this.getDomainEvents().add(new LedgerEntryLoggedEvent(this.id, this.operationType, this.amount));
+    }
+
     // Конструктор для первичного создания проводки (Вызывается биллинг-движком при фиксации списания/начисления)
     public LedgerAuditLog(Long userId, Long chargingInvoiceId, String operationType, BigDecimal amount,
                           BigDecimal walletBalanceSnapshot, BigDecimal historicalPricePerKwh,

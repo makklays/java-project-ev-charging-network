@@ -7,6 +7,7 @@ import com.techmatrix18.charging_session.application.port.out.ChargingSessionRep
 import com.techmatrix18.charging_session.domain.ChargingSession;
 import org.springframework.stereotype.Component;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * ChargingSessionRepositoryAdapter
@@ -50,7 +51,8 @@ public class ChargingSessionRepositoryAdapter implements ChargingSessionReposito
 
                 // Заполняем системную сущность Outbox
                 OutboxEventEntity outboxEntry = new OutboxEventEntity();
-                outboxEntry.setAggregateId(session.getId().toString()); // ID сессии зарядки
+                String sessionIdStr = String.valueOf(session.getId());
+                outboxEntry.setAggregateId(UUID.nameUUIDFromBytes(sessionIdStr.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
                 outboxEntry.setAggregateType("CHARGING_SESSION"); // Сформирует Kafka топик: charging-session-events
                 outboxEntry.setEventType(event.getClass().getSimpleName()); // Имя класса (например, ChargingSessionStartedEvent)
                 outboxEntry.setPayload(jsonPayload);

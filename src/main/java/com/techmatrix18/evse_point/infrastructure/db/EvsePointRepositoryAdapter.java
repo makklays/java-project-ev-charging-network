@@ -7,6 +7,7 @@ import com.techmatrix18.evse_point.application.port.out.EvsePointRepository;
 import com.techmatrix18.evse_point.domain.EvsePoint;
 import org.springframework.stereotype.Component;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * EvsePointRepositoryAdapter
@@ -50,7 +51,8 @@ public class EvsePointRepositoryAdapter implements EvsePointRepository {
 
                 // Заполняем системную сущность Outbox
                 OutboxEventEntity outboxEntry = new OutboxEventEntity();
-                outboxEntry.setAggregateId(evsePoint.getId().toString()); // ID физического порта
+                String evseIdStr = String.valueOf(evsePoint.getId());
+                outboxEntry.setAggregateId(UUID.nameUUIDFromBytes(evseIdStr.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
                 outboxEntry.setAggregateType("EVSE_POINT"); // Авто-топик в Kafka: evse-point-events
                 outboxEntry.setEventType(event.getClass().getSimpleName()); // Имя класса (например, EvseStatusChangedEvent)
                 outboxEntry.setPayload(jsonPayload);

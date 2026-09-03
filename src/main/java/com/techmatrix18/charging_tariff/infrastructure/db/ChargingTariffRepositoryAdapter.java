@@ -7,6 +7,7 @@ import com.techmatrix18.charging_tariff.application.port.out.ChargingTariffRepos
 import com.techmatrix18.charging_tariff.domain.ChargingTariff;
 import org.springframework.stereotype.Component;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * ChargingTariffRepositoryAdapter
@@ -50,7 +51,8 @@ public class ChargingTariffRepositoryAdapter implements ChargingTariffRepository
 
                 // Заполняем системную сущность Outbox
                 OutboxEventEntity outboxEntry = new OutboxEventEntity();
-                outboxEntry.setAggregateId(tariff.getId().toString()); // ID тарифной зоны
+                String idString = String.valueOf(tariff.getId());
+                outboxEntry.setAggregateId(UUID.nameUUIDFromBytes(idString.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
                 outboxEntry.setAggregateType("CHARGING_TARIFF"); // Сформирует Kafka топик: charging-tariff-events
                 outboxEntry.setEventType(event.getClass().getSimpleName()); // Имя класса (например, TariffPriceChangedEvent)
                 outboxEntry.setPayload(jsonPayload);

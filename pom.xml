@@ -69,21 +69,21 @@
         </dependency>
 
         <!-- Реактивный бэкенд (Real-time чаты и WebSocket-вспышки) -->
-        <dependency>
+        <!--dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
-        </dependency>
+        </dependency-->
 
         <!-- Высоконагруженный гео-трекинг (Реактивный R2DBC драйвер к Postgres) -->
-        <dependency>
+        <!--dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-r2dbc</artifactId>
-        </dependency>
-        <dependency>
+        </dependency-->
+        <!--dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>r2dbc-postgresql</artifactId>
             <scope>runtime</scope>
-        </dependency>
+        </dependency-->
 
         <!-- Стандартный стартер для тестирования (JUnit 5, Mockito, AssertJ) -->
         <dependency>

@@ -1,11 +1,11 @@
--- V8__create_charging_transactions_table.sql
--- Migration #8: create table charging_transactions
+-- V11__create_charging_transactions_table.sql
+-- Migration #11: create table charging_transactions
 
 -- Creating table 'charging_transactions' for tracking real-time EV charging sessions and billing data
 -- Таблица учета зарядных транзакций и real-time биллинга сети EV Charging network
 CREATE TABLE IF NOT EXISTS charging_sessions (
     id                  BIGSERIAL PRIMARY KEY,
-    user_id             BIGINT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+    user_id             BIGINT NOT NULL,
     connector_id        BIGINT NOT NULL REFERENCES connectors(id) ON DELETE RESTRICT,
 
     -- Текущий статус транзакции (IN_PROGRESS, COMPLETED, SUSPENDED, FAILED)
@@ -31,10 +31,12 @@ CREATE TABLE IF NOT EXISTS charging_sessions (
     updated_at          TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+ALTER TABLE charging_invoices ADD CONSTRAINT fk_invoices_sessions FOREIGN KEY (session_id) REFERENCES charging_sessions(id);
+
 -- Индекс для быстрого поиска активных транзакций пользователя (проверка баланса / личный кабинет)
 CREATE INDEX IF NOT EXISTS idx_transactions_user_status ON charging_invoices (user_id, status);
 
 -- Индекс для аналитического модуля (выручка станций, объемы прокачки по времени)
-CREATE INDEX IF NOT EXISTS idx_transactions_analytics ON charging_invoices (connector_id, started_at)
+CREATE INDEX IF NOT EXISTS idx_transactions_analytics ON charging_sessions (connector_id, started_at)
 WHERE status = 'COMPLETED';
 

@@ -1,12 +1,12 @@
--- V11__create_charging_invoices_table.sql
--- Migration #11: create table charging_invoices
+-- V8__create_charging_invoices_table.sql
+-- Migration #8: create table charging_invoices
 
 -- Таблица финансового итога (официальный счет / инвойс за зарядку)
 CREATE TABLE IF NOT EXISTS charging_invoices (
     id                      BIGSERIAL PRIMARY KEY,
 
     -- Жесткая связь с физической сессией (один счет на одну сессию)
-    session_id              BIGINT NOT NULL REFERENCES charging_sessions(id) ON DELETE RESTRICT,
+    session_id              BIGINT NOT NULL,
     user_id                 BIGINT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
 
     -- Уникальный номер счета для бухгалтерии (например: INV-2026-08-00123)

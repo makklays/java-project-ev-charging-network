@@ -58,7 +58,7 @@ public class OutboxEventPublisher {
                 String topicName = event.getAggregateType().toLowerCase().replace("_", "-") + "-events";
 
                 // Передаем eventType в заголовки Kafka, чтобы потребители знали, какой класс десериализовать
-                String key = event.getAggregateId(); // Идентификатор агрегата — это Partition Key в Kafka
+                String key = event.getAggregateId().toString(); // Конвертируем UUID в String для топика Kafka
                 String payload = event.getPayload();
 
                 // Синхронно или асинхронно отправляем в Kafka с ожиданием подтверждения (acks=all / acks=1)
@@ -71,12 +71,10 @@ public class OutboxEventPublisher {
                 // Если отправка прошла успешно
                 event.setStatus(OutboxEventEntity.OutboxStatus.PROCESSED);
                 event.setProcessedAt(ZonedDateTime.now());
-                event.setErrorMessage(null);
 
             } catch (Exception e) {
                 // Если брокер упал или сеть моргнула — фиксируем ошибку
                 event.setStatus(OutboxEventEntity.OutboxStatus.FAILED);
-                event.setErrorMessage(e.getMessage());
 
                 // В реальных высоконагруженных системах здесь также можно инкрементировать счетчик попыток (retry_count),
                 // чтобы не блокировать всю очередь из-за одного «битого» сообщения.
