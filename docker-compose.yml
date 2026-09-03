@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+
+  # 1. Наша единая база данных PostgreSQL
+  postgres:
+    image: postgres:16-alpine
+    container_name: ev_network_postgres
+    environment:
+      POSTGRES_DB: ev_network_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d ev_network_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. Брокер сообщений Apache Kafka (Совмещенный контроллер KRaft, без Zookeeper)
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: ev_network_kafka
+    ports:
+      - "9094:9094"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9094'
+      KAFKA_OFFERS_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_INITIAL_CLUSTER_ID: '4L62YDgWQNmX_69v7idF7A'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
+      KAFKA_LISTENERS: 'PLAINTEXT://0.0.0.0:29092,CONTROLLER://0.0.0.0:29093,PLAINTEXT_HOST://0.0.0.0:9094'
+      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+
+volumes:
+  pgdata:
+
