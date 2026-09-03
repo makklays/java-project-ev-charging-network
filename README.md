@@ -67,6 +67,7 @@ storage, ensuring the main **PostgreSQL** instance remains highly optimized and 
 Before booting the application, start the required cloud-ready environment (PostgreSQL 16 and Apache Kafka) using 
 Docker Compose:
 ```bash
+docker compose down -v
 docker compose up -d
 ```
 
