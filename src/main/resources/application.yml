@@ -17,8 +17,8 @@ spring:
   # --- НАСТРОЙКИ БАЗЫ ДАННЫХ (ЕДИНАЯ СУБД POSTGRESQL) ---
   datasource:
     url: jdbc:postgresql://localhost:5432/ev_network_db
-    username: techmatrix_user
-    password: techmatrix_secure_password
+    username: admin
+    password: admin
     driver-class-name: org.postgresql.Driver
     # Оптимизация пула подключений HikariCP для финтех-нагрузок
     hikari:
@@ -44,7 +44,7 @@ spring:
 
   # --- НАСТРОЙКИ ТРАНСПОРТНОГО СЛОЯ BROKER KAFKA ---
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: localhost:9094
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
